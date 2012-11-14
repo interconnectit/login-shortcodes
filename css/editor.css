@@ -1,0 +1,7 @@
+.loggedin-opening,
+.loggedin-closing,
+.loggedout-opening,
+.loggedout-closing {
+	font-family: monospace !important;
+	opacity: 0.7;
+}

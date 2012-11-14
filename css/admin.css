@@ -1,0 +1,87 @@
+.mceToolbar .mce_loggedin .mceIcon,
+.mceToolbar .mceButtonDisabled.mce_loggedin:hover .mceIcon {
+	background-image: url(../images/tinymce.png);
+	background-repeat: no-repeat;
+	background-position: -5px -36px;
+}
+.mceToolbar .mce_loggedout .mceIcon,
+.mceToolbar .mceButtonDisabled.mce_loggedout:hover .mceIcon {
+	background-image: url(../images/tinymce.png);
+	background-repeat: no-repeat;
+	background-position: -35px -36px;
+}
+
+.mceToolbar .mce_loggedin:hover .mceIcon,
+.mceToolbar .mceButtonActive.mce_loggedin .mceIcon {
+	background-position: -5px -4px;
+}
+.mceToolbar .mce_loggedout:hover .mceIcon,
+.mceToolbar .mceButtonActive.mce_loggedout .mceIcon {
+	background-position: -35px -4px;
+}
+
+/*------------------------------------------------------------------------------
+ logged in popup
+------------------------------------------------------------------------------*/
+
+#logged-in-popup {
+	background-color: #F5F5F5;
+	line-height: 1.4em;
+	font-size: 12px;
+}
+
+#logged-in-popup ol,
+#logged-in-popup ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#logged-in-popup p {
+	margin: 5px 10px;
+}
+
+#logged-in-popup label {
+	display: block;
+	padding: 3px 10px;
+}
+
+#logged-in-popup input {
+	margin-right: 5px;
+}
+
+#logged-in-popup li {
+	margin: 0;
+	padding: 0;
+}
+
+#logged-in-popup li:hover {
+	background: #eaf2fa;
+	color: #151515;
+}
+
+#logged-in-popup li.selected {
+	background: #ddd;
+	color: #333;
+}
+
+#logged-in-popup li.selected .item-title {
+	font-weight: bold;
+}
+
+#logged-in-popup .submitbox {
+	padding: 5px 10px;
+	font-size: 11px;
+	overflow: auto;
+	height: 29px;
+}
+
+#logged-in-cancel {
+	line-height: 25px;
+	float: left;
+}
+
+#logged-in-update {
+	line-height: 23px;
+	float: right;
+}
