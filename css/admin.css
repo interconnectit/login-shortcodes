@@ -1,20 +1,28 @@
+#wp-content-editor-container .mce-i-loggedin,
 .mceToolbar .mce_loggedin .mceIcon,
 .mceToolbar .mceButtonDisabled.mce_loggedin:hover .mceIcon {
 	background-image: url(../images/tinymce.png);
 	background-repeat: no-repeat;
 	background-position: -5px -36px;
+	background-size: initial;
 }
+
+#wp-content-editor-container .mce-i-loggedout,
 .mceToolbar .mce_loggedout .mceIcon,
 .mceToolbar .mceButtonDisabled.mce_loggedout:hover .mceIcon {
 	background-image: url(../images/tinymce.png);
 	background-repeat: no-repeat;
 	background-position: -35px -36px;
+	background-size: initial;
 }
 
+#wp-content-editor-container button:hover .mce-i-loggedin,
 .mceToolbar .mce_loggedin:hover .mceIcon,
 .mceToolbar .mceButtonActive.mce_loggedin .mceIcon {
 	background-position: -5px -4px;
 }
+
+#wp-content-editor-container button:hover .mce-i-loggedout,
 .mceToolbar .mce_loggedout:hover .mceIcon,
 .mceToolbar .mceButtonActive.mce_loggedout .mceIcon {
 	background-position: -35px -4px;
