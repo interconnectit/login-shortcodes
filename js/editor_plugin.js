@@ -1,5 +1,5 @@
 (function() {
-	tinymce.create('tinymce.plugins.loggedinout', {
+	tinymce.create( 'tinymce.plugins.loggedinout', {
 		/**
 		 * Initializes the plugin, this will be executed after the plugin has been created.
 		 * This call is done before the editor instance has finished it's initialization so use the onInit event
@@ -8,7 +8,7 @@
 		 * @param {tinymce.Editor} ed Editor instance that the plugin is initialized in.
 		 * @param {string} url Absolute URL to where the plugin is located.
 		 */
-		init : function(ed, url) {
+		init : function( ed, url ) {
 			var t = this;
 
 			t.block = true,
@@ -27,21 +27,26 @@
 			ed.addCommand( 'ICIT_Logged_In', function() {
 				if ( t.isTag || ( t.nearest && t.isShortcode( ed, t.nearest ) ) )
 					return t.removeShortcode( ed );
+
 				ed.windowManager.open({
-					id : 'logged-in-popup',
-					width : 480,
-					height : "auto",
-					title : 'Insert logged in only container',
-    				wpDialog: true
+					id: 		'logged-in-popup',
+					width:		480,
+					height:		400,
+					title:		'Insert logged in only container',
+					url:		ajaxurl + '?action=icit_logged_in'
 				}, {
-					plugin_url : url
+					plugin_url: url
 				});
+
+				return true;
 			});
 
 			ed.addCommand( 'ICIT_Logged_Out', function() {
 				if ( t.isTag || ( t.nearest && t.isShortcode( ed, t.nearest ) ) )
 					return t.removeShortcode( ed );
 				t.insertShortcode( 'loggedout' );
+
+				return true;
 			});
 
 			// Register buttons
@@ -55,12 +60,15 @@
 				cmd : 'ICIT_Logged_Out'
 			} );
 
-			ed.onNodeChange.add( function( ed, cm, n, co ) {
-				t.node = n;
+			ed.on( 'nodeChange', function( e ) {
+				var cm = ed.controlManager,
+					n = ed.selection.getNode();
 
 				// bust a move if the node isn't actually in the tinymce DOM
-				if ( ! ed.dom.select( n ).length ) return;
+				if ( !ed.dom.select( n ) )
+					return;
 
+				t.node = n;
 				t.start = ed.selection.getStart();
 				t.end = ed.selection.getEnd();
 				t.block = ( '' == ed.selection.getContent() && ed.dom.isBlock( n ) ) || t.start !== t.end;
@@ -75,15 +83,18 @@
 				cm.setActive( 'loggedout', t.isTag && t.isTag[ 1 ] == 'out' );
 
 				// if there's an opening tag before any closing tags
-				if ( ! t.isTag ) {
+				if ( !t.isTag ) {
 					var tag_up = n,
 						max = 0;
 
-					while( tag_up && ! t.isShortcode( ed, tag_up ) ) {
+					// Need to rework this so that it will check all the way up the tree.
+					while( tag_up && !t.isShortcode( ed, tag_up ) ) {
 						if ( ed.dom.getPrev( tag_up, ed.dom.isBlock ) )
 							tag_up = ed.dom.getPrev( tag_up, ed.dom.isBlock );
+
 						else if ( ed.dom.getParent( tag_up, ed.dom.isBlock ) )
 							tag_up = ed.dom.getParent( tag_up, ed.dom.isBlock );
+
 						else
 							break;
 
@@ -113,42 +124,44 @@
 			} );
 
 			// remove corresponding shortcode if deleted
-			ed.onKeyUp.add( function( ed, e ) {
-				if ( e.keyCode == 8 || e.keyCode == 46 && t.isTag ) {
+			ed.on( 'keyUp', function( e ) {
+				if ( ( e.keyCode == 8 || e.keyCode == 46 ) && t.isTag )
 					t.removeShortcode( ed );
-				}
 			} );
 		},
 
 		isShortcode : function ( ed, n ) {
-			console.log( ed.dom.select( n ), ed.dom.get( n ), ed, n, ed.dom.getAttrib( n, 'class' ) );
-			return n ? ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-(opening|closing)/ ) : false;
+			return n && !!ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-(opening|closing)/ );
 		},
 
 		isOpeningShortcode : function ( ed, n ) {
-			return n ? ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-opening/ ) : false;
+			return n && !!ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-opening/ );
 		},
 
 		isClosingShortcode : function ( ed, n ) {
-			return n ? ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-closing/ ) : false;
+			return n && !!ed.dom.getAttrib( n, 'class' ).match( /logged(in|out)-closing/ );
 		},
 
 		isInShortcode : function ( ed, n ) {
-			return n ? ed.dom.getAttrib( n, 'class' ).match( /loggedin-(opening|closing)/ ) : false;
+			return n && !!ed.dom.getAttrib( n, 'class' ).match( /loggedin-(opening|closing)/ );
 		},
 
 		isOutShortcode : function ( ed, n ) {
-			return n ? ed.dom.getAttrib( n, 'class' ).match( /loggedout-(opening|closing)/ ) : false;
+			return n && !!ed.dom.getAttrib( n, 'class' ).match( /loggedout-(opening|closing)/ );
 		},
 
 		insertShortcode : function( tag, attr ) {
-			var attr = attr || '',
-				opening_tag = '[' + tag + attr + ']',
+			attr = attr || '';
+
+			var opening_tag = '[' + tag + attr + ']',
 				closing_tag = '[/' + tag + ']',
 				ed = tinyMCE.activeEditor,
 				t = this,
 				node = t.node,
-				block = t.block;
+				block = t.block,
+				ot = ed.dom.create( 'p', { class: tag + '-opening' }, opening_tag ),
+				et = ed.dom.create( 'p', { class: tag + '-closing' }, closing_tag );
+
 
 			// console.log( 'insertShortcode', t.nearest, node );
 
@@ -160,26 +173,25 @@
 				block = '' == ed.selection.getContent() && ed.dom.isBlock( node );
 			}
 
-			// console.log( 'insertShortcode', t.nearest, node, t.block, block, t.start, t.end, ed.dom.getPrev( t.start, '*' ) );
-
+			// Selection
 			if ( t.block && t.start !== t.end ) {
-				ed.getBody().insertBefore( ed.dom.create( 'p', { class: tag + '-opening' }, opening_tag ), t.start );
-				ed.dom.insertAfter( ed.dom.create( 'p', { class: tag + '-closing' }, closing_tag ), t.end );
-			} else if ( block && t.start == t.end ) {
-				ed.getBody().insertBefore( ed.dom.create( 'p', { class: tag + '-opening' }, opening_tag ), node );
-				ed.dom.insertAfter( ed.dom.create( 'p', { class: tag + '-closing' }, closing_tag ), node );
-
-			} else
+				ed.selection.setContent( '<div class="' + tag + '-opening">' + opening_tag + '</div>' + ed.selection.getContent() + '<div class="' + tag + '-closing">' + closing_tag + '</div>' );
+			}
+			else if ( t.start !== t.end ) {
 				ed.selection.setContent( '<span class="' + tag + '-opening">' + opening_tag + '</span>' + ed.selection.getContent() + '<span class="' + tag + '-closing">' + closing_tag + '</span>' );
+			}
+			else {
+				// Run up the tree until we find a block level element
+				while ( !ed.dom.isBlock( node ) && node.parentNode.nodeName !== 'BODY' )
+					node = node.parentNode;
 
-			if ( block && tag.match( /loggedout/ ) ) {
-				t.cm.setDisabled( 'loggedin', 1 );
-				t.cm.setActive( 'loggedout', 1 );
+				// We've not killed all parents?
+				if ( node.parentNode ) {
+					node.parentNode.insertBefore( ot, node );
+					ed.dom.insertAfter( et, node);
+				}
 			}
-			if ( block && tag.match( /loggedin/ ) ) {
-				t.cm.setDisabled( 'loggedout', 1 );
-				t.cm.setActive( 'loggedin', 1 );
-			}
+
 			ed.focus();
 		},
 
